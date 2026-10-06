@@ -9,7 +9,7 @@ workspace: ${{ env.projectDir }}
 
 sandboxOptions:
   cpus: 8
-  memory: 12g
+  memory: 8g
 
   # Globale Skills in jeder Sandbox
   skills: readonly
