@@ -30,10 +30,14 @@ mcp:
 
     # Beispiel: lokaler stdio MCP
     - name: playwright
-      command: npx
+      command: docker
       args:
-        - "-y"
-        - "@playwright/mcp@latest"
+        - run
+        - -i
+        - --rm
+        - --init
+        - --pull=always
+        - mcr.microsoft.com/playwright/mcp
 
 
 # -------------------------------------------------------
