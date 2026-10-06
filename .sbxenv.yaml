@@ -1,0 +1,76 @@
+schemaVersion: "1"
+
+agent: sbx-kit-codex
+
+kits:
+  - source: docker.io/docker/sbx-kit-codex:0.159.2
+
+workspace: ${{ env.projectDir }}
+
+sandboxOptions:
+  cpus: 8
+  memory: 12g
+
+  # Globale Skills in jeder Sandbox
+  skills: readonly
+
+  pullPolicy: always
+
+
+# -------------------------------------------------------
+# Globale MCP Server
+# -------------------------------------------------------
+
+mcp:
+  servers:
+
+    # OpenAI Dokumentation
+    - name: openai-docs
+      url: https://developers.openai.com/mcp
+
+    # Beispiel: lokaler stdio MCP
+    - name: playwright
+      command: npx
+      args:
+        - "-y"
+        - "@playwright/mcp@latest"
+
+
+# -------------------------------------------------------
+# OpenAI Auth
+# -------------------------------------------------------
+
+bindings:
+  openai:
+    oauth:
+      domains:
+        - auth.openai.com
+        - chatgpt.com
+
+
+# -------------------------------------------------------
+# Globale Codex Settings
+# -------------------------------------------------------
+
+lifecycle:
+  postCreate:
+    - name: Apply global Codex TUI settings
+      command: |
+        $sandbox = $env:SBX_SANDBOX_NAME
+        $tuiConfig = Join-Path $HOME ".config\codex-sbx\tui.toml"
+
+        if (-not (Test-Path $tuiConfig)) {
+            throw "Codex TUI config not found: $tuiConfig"
+        }
+
+        sbx cp "$tuiConfig" "${sandbox}:/tmp/codex-tui.toml"
+
+        if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+        }
+
+        sbx exec $sandbox bash -lc 'set -eu; cfg=/home/agent/.codex/config.toml; if grep -q "^\[tui\]" "$cfg"; then echo "ERROR: [tui] already exists in $cfg" >&2; exit 20; fi; printf "\n" >> "$cfg"; cat /tmp/codex-tui.toml >> "$cfg"; rm -f /tmp/codex-tui.toml'
+
+        if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+        }
