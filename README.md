@@ -1,7 +1,12 @@
+# install
+- Files wie folg ablegen:
+- C:\Users\<DEIN-BENUTZERNAME>\.sbxenv.yaml
+- C:\Users\<DEIN-BENUTZERNAME>\.config\codex-sbx\tui.toml
+
 # eigene Skills einfügen:
 
 ### Skills die aufdem Host unter ~/.agents/skills liegen:
-- mit 
+- mit:
 ```powershell
 sbx skills import --dry-run
 sbx skills import
@@ -14,7 +19,6 @@ sbx skills ls
 ```
 
 ### Skills aus einem Repo:
-- 
 ```powershell
 sbx skills add https://github.com/example/my-agent-skills
 ```
