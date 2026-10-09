@@ -59,4 +59,4 @@ bindings:
 lifecycle:
   postCreate:
     - name: Apply global Codex TUI settings
-      command: '"C:\Program Files\Git\bin\bash.exe" -c "$HOME/.config/codex-sbx/apply-tui.sh"'
+      command: bash "$HOME/.config/codex-sbx/apply-tui.sh"
