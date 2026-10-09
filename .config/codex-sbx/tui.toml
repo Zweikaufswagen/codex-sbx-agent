@@ -1,14 +1,13 @@
 [tui]
-status_line = 
-[
-    "model-with-reasoning", 
-    "current-dir", 
-    "hostname", 
-    "permissions", 
-    "context-used", 
-    "weekly-limit", 
-    "codex-version", 
-    "total-input-tokens", 
+status_line = [
+    "model-with-reasoning",
+    "current-dir",
+    "hostname",
+    "permissions",
+    "context-used",
+    "weekly-limit",
+    "codex-version",
+    "total-input-tokens",
     "total-output-tokens"
 ]
 

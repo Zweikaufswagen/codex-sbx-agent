@@ -4,35 +4,44 @@ set -euo pipefail
 
 SANDBOX="${SBX_SANDBOX_NAME:?SBX_SANDBOX_NAME is not set}"
 TUI_CONFIG="${HOME}/.config/codex-sbx/tui.toml"
-TARGET_CONFIG="/home/agent/.codex/config.toml"
 
+# Validate host configuration
 if [[ ! -f "$TUI_CONFIG" ]]; then
     echo "ERROR: TUI config not found: $TUI_CONFIG" >&2
     exit 1
 fi
 
-command -v sbx >/dev/null 2>&1 || {
+if ! command -v sbx >/dev/null 2>&1; then
     echo "ERROR: sbx CLI not found" >&2
     exit 1
-}
+fi
 
 echo "Applying Codex TUI settings to: $SANDBOX"
 
-# Copy configuration into sandbox
-sbx cp "$TUI_CONFIG" "${SANDBOX}:/tmp/codex-tui.toml"
+# Copy configuration into the agent's writable directory
+sbx cp "$TUI_CONFIG" \
+    "${SANDBOX}:/home/agent/.codex/.tui-import.toml"
 
-# Apply configuration inside sandbox
+# Apply configuration inside the sandbox
 sbx exec "$SANDBOX" bash -c '
     set -euo pipefail
 
     cfg="/home/agent/.codex/config.toml"
-    tui="/tmp/codex-tui.toml"
+    tui="/home/agent/.codex/.tui-import.toml"
+    tmp="${cfg}.tmp"
 
-    test -f "$cfg"
-    test -f "$tui"
+    if [[ ! -f "$cfg" ]]; then
+        echo "ERROR: Codex config not found: $cfg" >&2
+        exit 1
+    fi
 
-    # Replace existing [tui] section, if any.
-    # Preserve all unrelated configuration.
+    if [[ ! -f "$tui" ]]; then
+        echo "ERROR: TUI import not found: $tui" >&2
+        exit 1
+    fi
+
+    # Remove existing [tui] section
+    # Preserve all unrelated configuration
     awk '"'"'
         /^\[tui\][[:space:]]*$/ {
             skip=1
@@ -44,13 +53,17 @@ sbx exec "$SANDBOX" bash -c '
         !skip {
             print
         }
-    '"'"' "$cfg" > "${cfg}.tmp"
+    '"'"' "$cfg" > "$tmp"
 
-    printf "\n" >> "${cfg}.tmp"
-    cat "$tui" >> "${cfg}.tmp"
+    # Append global TUI configuration
+    printf "\n" >> "$tmp"
+    cat "$tui" >> "$tmp"
 
-    cat "${cfg}.tmp" > "$cfg"
-    rm -f "${cfg}.tmp" "$tui"
+    # Update original file while preserving its ownership
+    cat "$tmp" > "$cfg"
+
+    # Clean up temporary files
+    rm -f "$tmp" "$tui"
 
     echo "Codex TUI settings applied successfully."
 '

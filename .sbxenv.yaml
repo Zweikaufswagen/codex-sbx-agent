@@ -59,4 +59,4 @@ bindings:
 lifecycle:
   postCreate:
     - name: Apply global Codex TUI settings
-      command: '"C:\Program Files\Git\bin\bash.exe" -c "$HOME/.config/codex-sbx/apply-tui.sh"'
+      command: 'powershell.exe -NoProfile -NonInteractive -Command "& (Join-Path $env:LOCALAPPDATA ''Programs\Git\bin\bash.exe'') -c ''bash "$HOME/.config/codex-sbx/apply-tui.sh"''"'
