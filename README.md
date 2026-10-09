@@ -59,3 +59,8 @@ mcp:
         - --pull=always
         - mcr.microsoft.com/playwright/mcp
 ```
+
+## sbx bereinigen
+``` powershell
+sbx prune
+```
